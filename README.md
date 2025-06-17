@@ -38,6 +38,38 @@
    python main.py
    ```
 
+## 打包程序
+
+1. 安装PyInstaller
+   ```bash
+   pip install pyinstaller
+   ```
+
+2. 打包命令
+   ```bash
+   # 基本打包命令（生成单个exe文件，不显示控制台窗口）
+   pyinstaller --noconsole --onefile main.py
+
+   # 包含额外数据文件的打包命令
+   pyinstaller --noconsole --onefile --add-data "src;src" main.py
+
+   # 添加图标的打包命令
+   pyinstaller --noconsole --onefile --icon=path/to/your/icon.ico main.py
+   ```
+
+3. 打包说明
+   - 打包后的文件位于 `dist` 目录下
+   - `--noconsole`: 不显示控制台窗口
+   - `--onefile`: 将所有依赖打包成单个exe文件
+   - `--add-data`: 添加额外的数据文件
+   - `--icon`: 为exe文件添加图标
+
+4. 注意事项
+   - 确保所有依赖包都已正确安装
+   - 如果程序需要访问外部文件，请使用 `--add-data` 参数
+   - 首次运行打包后的程序时，可能会被杀毒软件拦截，需要添加信任
+   - 建议在打包前先完整测试程序功能
+
 ## 功能说明
 
 1. 串口通信
