@@ -122,13 +122,17 @@
 
 ## 数据存储
 
-- 数据存储在 SQLite 数据库中（temperature_data.db）
+- 程序数据存储在用户文档目录下的 `FPGA_Serial_Tool` 文件夹中：
+  - 日志文件：`Documents/FPGA_Serial_Tool/logs/system.log`
+  - 数据文件：`Documents/FPGA_Serial_Tool/data/`
+  - 配置文件：`Documents/FPGA_Serial_Tool/config/`
 - 支持数据导出和备份
-- 自动记录系统日志（system.log）
+- 自动记录系统日志
 
 ## 注意事项
 
 1. 首次运行前请确保已正确安装所有依赖
 2. 确保有适当的串口访问权限
-3. 建议定期备份数据库文件
-4. 如遇到问题，请查看系统日志文件 
+3. 建议定期备份数据文件
+4. 如遇到问题，请查看系统日志文件
+5. 打包后的程序会在用户文档目录下自动创建数据存储文件夹 
