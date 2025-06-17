@@ -13,20 +13,26 @@ from src.core.system_monitor import SystemMonitor
 from src.core.security import SecurityManager
 from src.gui.main_window import MainWindow
 
-# 获取项目根目录
-root_dir = os.path.dirname(os.path.abspath(__file__))
+# 获取应用程序数据目录
+def get_app_data_dir():
+    # 在用户的文档目录下创建应用数据文件夹
+    app_dir = os.path.join(os.path.expanduser('~'), 'Documents', 'FPGA_Serial_Tool')
+    # 创建必要的子目录
+    for subdir in ['logs', 'data', 'config']:
+        path = os.path.join(app_dir, subdir)
+        if not os.path.exists(path):
+            os.makedirs(path)
+    return app_dir
 
-# 确保日志目录存在
-log_dir = os.path.join(root_dir, 'logs')
-if not os.path.exists(log_dir):
-    os.makedirs(log_dir)
+# 获取应用程序数据目录
+app_dir = get_app_data_dir()
 
 # 配置日志
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler(os.path.join(log_dir, 'system.log')),
+        logging.FileHandler(os.path.join(app_dir, 'logs', 'system.log')),
         logging.StreamHandler()
     ]
 )
