@@ -30,7 +30,7 @@ class MainWindow(tk.Tk):
         self.main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         
         # 创建左侧控制面板
-        self.control_frame = SerialControls(self.main_frame, self.serial_comm, self.security_manager)
+        self.control_frame = SerialControls(self.main_frame, self.serial_comm, self.security_manager, self)
         self.control_frame.pack(side=tk.LEFT, fill=tk.Y, padx=5, pady=5)
         
         # 创建右侧数据显示区域
@@ -43,6 +43,10 @@ class MainWindow(tk.Tk):
     def setup_status_bar(self):
         self.status_bar = ttk.Label(self, text="就绪", relief=tk.SUNKEN, anchor=tk.W)
         self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
+        
+    def refresh_alarm_display(self):
+        """刷新报警阈值显示"""
+        self.display_frame.update_alarm_info()
         
     def start_data_thread(self):
         def read_serial_data():

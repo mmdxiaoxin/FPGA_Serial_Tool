@@ -1,12 +1,14 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 from ..core.global_vars import g_vars
+from .alarm_config import AlarmConfigDialog
 
 class SerialControls(ttk.LabelFrame):
-    def __init__(self, parent, serial_comm, security_manager):
+    def __init__(self, parent, serial_comm, security_manager, main_window=None):
         super().__init__(parent, text="串口控制")
         self.serial_comm = serial_comm
         self.security_manager = security_manager
+        self.main_window = main_window
         self.setup_controls()
         
     def setup_controls(self):
@@ -28,6 +30,10 @@ class SerialControls(ttk.LabelFrame):
         self.btn_toggle_serial = ttk.Button(self, text="打开串口", command=self.toggle_serial)
         self.btn_toggle_serial.pack(pady=10)
         
+        # 报警配置按钮
+        self.btn_alarm_config = ttk.Button(self, text="报警阈值配置", command=self.open_alarm_config)
+        self.btn_alarm_config.pack(pady=5)
+        
         # 数据发送区域
         ttk.Label(self, text="发送数据:").pack(pady=5)
         self.entry_send = ttk.Entry(self, width=30)
@@ -48,6 +54,15 @@ class SerialControls(ttk.LabelFrame):
             self.serial_comm.close_port()
             self.btn_toggle_serial.config(text="打开串口")
             self.security_manager.log_operation("串口操作", "关闭串口")
+            
+    def open_alarm_config(self):
+        """打开报警配置对话框"""
+        dialog = AlarmConfigDialog(self)
+        dialog.wait_window()  # 等待对话框关闭
+        
+        # 配置保存后刷新显示
+        if self.main_window:
+            self.main_window.refresh_alarm_display()
             
     def send_data(self):
         data = self.entry_send.get()
