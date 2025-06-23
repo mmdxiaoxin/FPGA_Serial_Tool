@@ -9,6 +9,7 @@
    - 或访问 [Anaconda官网](https://www.anaconda.com/products/distribution) 下载并安装Anaconda
 
 2. 创建并激活环境
+
    ```bash
    # 创建环境
    conda env create -f environment.yml
@@ -18,6 +19,7 @@
    ```
 
 3. 验证安装
+
    ```bash
    # 检查Python版本
    python --version
@@ -29,11 +31,13 @@
 ## 运行程序
 
 1. 确保已激活环境
+
    ```bash
    conda activate fpga_serial_tool
    ```
 
 2. 运行程序
+
    ```bash
    python main.py
    ```
@@ -41,11 +45,13 @@
 ## 打包程序
 
 1. 安装PyInstaller
+
    ```bash
    pip install pyinstaller
    ```
 
 2. 打包命令
+
    ```bash
    # 基本打包命令（生成单个exe文件，不显示控制台窗口）
    pyinstaller --noconsole --onefile main.py
@@ -135,4 +141,4 @@
 2. 确保有适当的串口访问权限
 3. 建议定期备份数据文件
 4. 如遇到问题，请查看系统日志文件
-5. 打包后的程序会在用户文档目录下自动创建数据存储文件夹 
+5. 打包后的程序会在用户文档目录下自动创建数据存储文件夹
