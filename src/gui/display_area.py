@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk, scrolledtext
 from tkinter import messagebox
 from ..core.global_vars import g_vars
+from .chart_widget import ChartWidget
 import time
 
 class DisplayArea(ttk.LabelFrame):
@@ -21,23 +22,38 @@ class DisplayArea(ttk.LabelFrame):
         self.setup_display()
         
     def setup_display(self):
-        # 创建数据显示区域
-        self.text_display = scrolledtext.ScrolledText(self, width=80, height=20, wrap=tk.WORD)
+        # 创建数据显示区域（限制高度）
+        text_frame = ttk.LabelFrame(self, text="数据显示")
+        text_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        self.text_display = scrolledtext.ScrolledText(text_frame, width=80, height=8, wrap=tk.WORD)
         self.text_display.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
-        # 创建报警阈值显示区域
-        self.alarm_info_frame = ttk.LabelFrame(self, text="当前报警阈值")
-        self.alarm_info_frame.pack(fill=tk.X, padx=5, pady=5)
+        # 创建信息显示区域（水平排列）
+        info_frame = ttk.Frame(self)
+        info_frame.pack(fill=tk.X, padx=5, pady=5)
+        
+        # 左侧：报警阈值显示
+        self.alarm_info_frame = ttk.LabelFrame(info_frame, text="当前报警阈值")
+        self.alarm_info_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(0, 5))
         self.setup_alarm_info()
         
-        # 创建报警状态显示区域
-        self.alarm_status_frame = ttk.LabelFrame(self, text="报警状态")
-        self.alarm_status_frame.pack(fill=tk.X, padx=5, pady=5)
+        # 中间：报警状态显示
+        self.alarm_status_frame = ttk.LabelFrame(info_frame, text="报警状态")
+        self.alarm_status_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=5)
         self.setup_alarm_status()
         
-        # 创建图表区域（预留）
-        self.chart_frame = ttk.LabelFrame(self, text="实时数据图表")
-        self.chart_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        # 右侧：统计信息显示
+        self.stats_frame = ttk.LabelFrame(info_frame, text="数据统计")
+        self.stats_frame.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(5, 0))
+        self.setup_stats_display()
+        
+        # 创建图表区域（占据剩余空间）
+        chart_container = ttk.LabelFrame(self, text="实时数据图表")
+        chart_container.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        self.chart_widget = ChartWidget(chart_container)
+        self.chart_widget.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
         
     def setup_alarm_info(self):
         """设置报警阈值信息显示"""
@@ -131,6 +147,12 @@ class DisplayArea(ttk.LabelFrame):
         self.text_display.insert(tk.END, display_text)
         self.text_display.see(tk.END)
         
+        # 更新图表
+        self.chart_widget.add_data_point(data)
+        
+        # 更新统计信息
+        self.update_stats_display()
+        
     def check_alarm_conditions(self, data):
         """检查报警条件，防止重复弹窗"""
         alarm_config = g_vars.config.get('alarm', {})
@@ -195,4 +217,37 @@ class DisplayArea(ttk.LabelFrame):
         for key in self.alarm_states:
             self.alarm_states[key] = False
         self.last_alarm_time = 0
-        self.update_alarm_status_display() 
+        self.update_alarm_status_display()
+        
+    def setup_stats_display(self):
+        """设置统计信息显示"""
+        # 温度统计
+        temp_stats_frame = ttk.Frame(self.stats_frame)
+        temp_stats_frame.pack(fill=tk.X, padx=5, pady=2)
+        
+        ttk.Label(temp_stats_frame, text="温度统计:").pack(side=tk.LEFT)
+        self.temp_stats_label = ttk.Label(temp_stats_frame, text="暂无数据", foreground="gray")
+        self.temp_stats_label.pack(side=tk.LEFT, padx=(5, 0))
+        
+        # 湿度统计
+        humidity_stats_frame = ttk.Frame(self.stats_frame)
+        humidity_stats_frame.pack(fill=tk.X, padx=5, pady=2)
+        
+        ttk.Label(humidity_stats_frame, text="湿度统计:").pack(side=tk.LEFT)
+        self.humidity_stats_label = ttk.Label(humidity_stats_frame, text="暂无数据", foreground="gray")
+        self.humidity_stats_label.pack(side=tk.LEFT, padx=(5, 0))
+        
+    def update_stats_display(self):
+        """更新统计信息显示"""
+        stats = self.chart_widget.get_statistics()
+        if stats:
+            # 更新温度统计
+            temp_text = f"平均: {stats['temp_avg']:.2f}°C, 最高: {stats['temp_max']:.2f}°C, 最低: {stats['temp_min']:.2f}°C"
+            self.temp_stats_label.config(text=temp_text, foreground="black")
+            
+            # 更新湿度统计
+            humidity_text = f"平均: {stats['humidity_avg']:.2f}%, 最高: {stats['humidity_max']:.2f}%, 最低: {stats['humidity_min']:.2f}%"
+            self.humidity_stats_label.config(text=humidity_text, foreground="black")
+        else:
+            self.temp_stats_label.config(text="暂无数据", foreground="gray")
+            self.humidity_stats_label.config(text="暂无数据", foreground="gray") 

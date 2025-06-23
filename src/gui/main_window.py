@@ -12,7 +12,7 @@ class MainWindow(tk.Tk):
         super().__init__()
         
         self.title("FPGA声学测温系统")
-        self.geometry("1200x800")
+        self.geometry("1400x900")
         
         # 初始化组件
         self.serial_comm = serial_comm
@@ -29,13 +29,37 @@ class MainWindow(tk.Tk):
         self.main_frame = ttk.Frame(self)
         self.main_frame.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
         
-        # 创建左侧控制面板
+        # 创建左侧控制面板（固定宽度）
         self.control_frame = SerialControls(self.main_frame, self.serial_comm, self.security_manager, self)
-        self.control_frame.pack(side=tk.LEFT, fill=tk.Y, padx=5, pady=5)
+        self.control_frame.pack(side=tk.LEFT, fill=tk.Y, padx=(0, 10), pady=5)
+        
+        # 创建右侧滚动区域
+        self.right_frame = ttk.Frame(self.main_frame)
+        self.right_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # 创建画布和滚动条
+        self.canvas = tk.Canvas(self.right_frame)
+        self.scrollbar = ttk.Scrollbar(self.right_frame, orient="vertical", command=self.canvas.yview)
+        self.scrollable_frame = ttk.Frame(self.canvas)
+        
+        self.scrollable_frame.bind(
+            "<Configure>",
+            lambda e: self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        )
+        
+        self.canvas.create_window((0, 0), window=self.scrollable_frame, anchor="nw")
+        self.canvas.configure(yscrollcommand=self.scrollbar.set)
         
         # 创建右侧数据显示区域
-        self.display_frame = DisplayArea(self.main_frame)
-        self.display_frame.pack(side=tk.RIGHT, fill=tk.BOTH, expand=True, padx=5, pady=5)
+        self.display_frame = DisplayArea(self.scrollable_frame)
+        self.display_frame.pack(fill=tk.BOTH, expand=True, padx=5, pady=5)
+        
+        # 布局画布和滚动条
+        self.canvas.pack(side="left", fill="both", expand=True)
+        self.scrollbar.pack(side="right", fill="y")
+        
+        # 绑定鼠标滚轮事件
+        self.canvas.bind_all("<MouseWheel>", self._on_mousewheel)
         
         # 状态栏
         self.setup_status_bar()
@@ -94,4 +118,8 @@ class MainWindow(tk.Tk):
         g_vars.is_running = False
         if g_vars.is_serial_open:
             self.serial_comm.close_port()
-        self.destroy() 
+        self.destroy()
+
+    def _on_mousewheel(self, event):
+        """处理鼠标滚轮事件"""
+        self.canvas.yview_scroll(int(-1*(event.delta/120)), "units") 
