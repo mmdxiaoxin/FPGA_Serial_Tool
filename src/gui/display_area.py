@@ -40,6 +40,14 @@ class DisplayArea(ttk.LabelFrame):
         self.humidity_threshold_label = ttk.Label(humidity_frame, text="", foreground="blue")
         self.humidity_threshold_label.pack(side=tk.LEFT, padx=(5, 0))
         
+        # 配置状态显示
+        status_frame = ttk.Frame(self.alarm_info_frame)
+        status_frame.pack(fill=tk.X, padx=5, pady=2)
+        
+        ttk.Label(status_frame, text="配置状态:").pack(side=tk.LEFT)
+        self.config_status_label = ttk.Label(status_frame, text="", foreground="green")
+        self.config_status_label.pack(side=tk.LEFT, padx=(5, 0))
+        
         # 更新阈值显示
         self.update_alarm_info()
         
@@ -51,6 +59,11 @@ class DisplayArea(ttk.LabelFrame):
         
         self.temp_threshold_label.config(text=temp_text)
         self.humidity_threshold_label.config(text=humidity_text)
+        
+        # 更新配置状态
+        from datetime import datetime
+        status_text = f"已更新 ({datetime.now().strftime('%H:%M:%S')})"
+        self.config_status_label.config(text=status_text)
         
     def update_display(self, data):
         display_text = (f"时间: {data['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}\n"

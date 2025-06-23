@@ -57,9 +57,12 @@ class SerialControls(ttk.LabelFrame):
             
     def open_alarm_config(self):
         """打开报警配置对话框"""
-        dialog = AlarmConfigDialog(self)
+        # 传递回调函数给对话框
+        dialog = AlarmConfigDialog(self, callback=self.refresh_alarm_display)
         dialog.wait_window()  # 等待对话框关闭
         
+    def refresh_alarm_display(self):
+        """刷新报警阈值显示"""
         # 配置保存后刷新显示
         if self.main_window:
             self.main_window.refresh_alarm_display()

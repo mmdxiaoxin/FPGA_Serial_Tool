@@ -13,12 +13,16 @@ class GlobalVars:
         
         # 获取项目根目录
         self.root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+        
+        # 获取应用程序数据目录（与main.py保持一致）
+        self.app_data_dir = os.path.join(os.path.expanduser('~'), 'Documents', 'FPGA_Serial_Tool')
+        
         self.config = self.load_config()
         self.encryption_key = Fernet.generate_key()
         self.cipher_suite = Fernet(self.encryption_key)
         
     def load_config(self):
-        config_path = os.path.join(self.root_dir, 'config', 'config.json')
+        config_path = os.path.join(self.app_data_dir, 'config', 'config.json')
         try:
             with open(config_path, 'r') as f:
                 return json.load(f)
@@ -37,7 +41,7 @@ class GlobalVars:
                     'max_data_points': 1000
                 },
                 'storage': {
-                    'db_path': os.path.join(self.root_dir, 'data', 'temperature_data.db'),
+                    'db_path': os.path.join(self.app_data_dir, 'data', 'temperature_data.db'),
                     'backup_interval': 3600
                 },
                 'alarm': {

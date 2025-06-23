@@ -5,7 +5,7 @@ import json
 import os
 
 class AlarmConfigDialog(tk.Toplevel):
-    def __init__(self, parent):
+    def __init__(self, parent, callback=None):
         super().__init__(parent)
         self.title("报警阈值配置")
         self.geometry("400x300")
@@ -15,8 +15,25 @@ class AlarmConfigDialog(tk.Toplevel):
         self.transient(parent)
         self.grab_set()
         
+        # 保存回调函数
+        self.callback = callback
+        
+        # 配置按钮样式
+        self.setup_button_styles()
+        
         self.setup_ui()
         self.load_current_config()
+        
+    def setup_button_styles(self):
+        """设置按钮样式"""
+        style = ttk.Style()
+        # 创建主要按钮样式
+        style.configure("Save.TButton", 
+                       background="#4CAF50", 
+                       foreground="white",
+                       font=("Arial", 10, "bold"))
+        style.map("Save.TButton",
+                 background=[("active", "#45a049")])
         
     def setup_ui(self):
         # 主框架
@@ -63,17 +80,28 @@ class AlarmConfigDialog(tk.Toplevel):
         button_frame = ttk.Frame(main_frame)
         button_frame.pack(fill=tk.X, pady=(20, 0))
         
-        # 保存按钮
-        self.save_btn = ttk.Button(button_frame, text="保存", command=self.save_config)
-        self.save_btn.pack(side=tk.RIGHT, padx=(5, 0))
-        
-        # 取消按钮
-        self.cancel_btn = ttk.Button(button_frame, text="取消", command=self.destroy)
-        self.cancel_btn.pack(side=tk.RIGHT)
-        
         # 重置按钮
         self.reset_btn = ttk.Button(button_frame, text="重置默认值", command=self.reset_to_default)
         self.reset_btn.pack(side=tk.LEFT)
+        
+        # 右侧按钮框架
+        right_button_frame = ttk.Frame(button_frame)
+        right_button_frame.pack(side=tk.RIGHT)
+        
+        # 取消按钮
+        self.cancel_btn = ttk.Button(right_button_frame, text="取消", command=self.destroy)
+        self.cancel_btn.pack(side=tk.RIGHT, padx=(5, 0))
+        
+        # 保存按钮（主要按钮，使用更明显的样式）
+        self.save_btn = ttk.Button(right_button_frame, text="保存配置", command=self.save_config, style="Save.TButton")
+        self.save_btn.pack(side=tk.RIGHT, padx=(5, 0))
+        
+        # 绑定键盘快捷键
+        self.bind('<Return>', lambda e: self.save_config())  # 回车键保存
+        self.bind('<Escape>', lambda e: self.destroy())      # ESC键取消
+        
+        # 设置默认焦点到保存按钮
+        self.save_btn.focus_set()
         
     def load_current_config(self):
         """加载当前配置"""
@@ -117,6 +145,14 @@ class AlarmConfigDialog(tk.Toplevel):
         if not self.validate_inputs():
             return
             
+        # 显示确认对话框
+        result = messagebox.askyesno("确认保存", 
+                                   "确定要保存当前的报警阈值配置吗？\n\n"
+                                   f"温度阈值: {self.temp_low_var.get()}°C ~ {self.temp_high_var.get()}°C\n"
+                                   f"湿度阈值: {self.humidity_low_var.get()}% ~ {self.humidity_high_var.get()}%")
+        if not result:
+            return
+            
         # 更新配置
         g_vars.config['alarm'] = {
             'temp_high': self.temp_high_var.get(),
@@ -126,14 +162,23 @@ class AlarmConfigDialog(tk.Toplevel):
         }
         
         # 保存到文件
-        config_path = os.path.join(g_vars.root_dir, 'config', 'config.json')
+        config_path = os.path.join(g_vars.app_data_dir, 'config', 'config.json')
         try:
             with open(config_path, 'w') as f:
                 json.dump(g_vars.config, f, indent=4)
-            messagebox.showinfo("成功", "报警阈值配置已保存")
+            
+            # 显示成功消息
+            messagebox.showinfo("保存成功", 
+                              "报警阈值配置已成功保存！\n\n"
+                              "新的阈值设置将立即生效。")
+            
+            # 调用回调函数通知主窗口刷新显示
+            if self.callback:
+                self.callback()
+                
             self.destroy()
         except Exception as e:
-            messagebox.showerror("错误", f"保存配置失败: {e}")
+            messagebox.showerror("保存失败", f"保存配置时发生错误:\n{e}")
             
     def reset_to_default(self):
         """重置为默认值"""

@@ -2,10 +2,11 @@ import sqlite3
 import logging
 from datetime import datetime
 from .global_vars import g_vars
+import os
 
 class DataStorage:
     def __init__(self):
-        self.db_path = g_vars.config['storage']['db_path']
+        self.db_path = os.path.join(g_vars.app_data_dir, 'data', 'temperature_data.db')
         self.init_database()
         
     def init_database(self):
