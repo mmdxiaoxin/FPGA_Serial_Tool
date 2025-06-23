@@ -141,7 +141,7 @@ class DisplayArea(ttk.LabelFrame):
         display_text = (f"时间: {data['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}\n"
                        f"温度: {data['temperature']:.2f}°C\n"
                        f"湿度: {data['humidity']:.2f}%\n"
-                       f"其他值: {data['other_value']:.2f}\n"
+                       f"辅助值: {data['other_value']:.2f}\n"
                        f"{'='*50}\n")
         
         self.text_display.insert(tk.END, display_text)
